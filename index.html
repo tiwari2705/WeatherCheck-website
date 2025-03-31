@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WeatherCheck - Weather Forecast</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <i class="fas fa-cloud"></i>
+                <span>Weather Check</span>
+            </div>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <nav class="nav" id="mainNav">
+                <ul>
+                    <li><a href="index.html" class="active">Home</a></li>
+                    <li><a href="#">Forecast</a></li>
+                    <li><a href="#">Maps</a></li>
+                    <li><a href="#">About</a></li>
+                    <li><a href="sign-in.html" class="sign-in-btn">Sign In</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <h1 class="page-title">Weather Forecast</h1>
+            
+            <div class="search-container">
+                <form id="searchForm">
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Search for a city...">
+                    </div>
+                    <button type="submit" class="search-btn">Search</button>
+                </form>
+            </div>
+
+            <div class="weather-container">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="current">Current Weather</button>
+                    <button class="tab-btn" data-tab="forecast">7-Day Forecast</button>
+                </div>
+
+                <div class="tab-content active" id="currentTab">
+                    <div class="weather-card">
+                        <div class="weather-header">
+                            <h2 id="cityName">Varanasi</h2>
+                            <p class="weather-subtitle">Current weather conditions</p>
+                        </div>
+                        <div class="weather-body">
+                            <div class="current-weather">
+                                <div class="weather-icon">
+                                    <i class="fas fa-cloud"></i>
+                                </div>
+                                <h3 class="temperature" id="currentTemp">22°C</h3>
+                                <p class="weather-desc" id="weatherDesc">Partly Cloudy</p>
+                            </div>
+                            
+                            <div class="weather-details">
+                                <div class="detail-item">
+                                    <i class="fas fa-temperature-high"></i>
+                                    <div>
+                                        <p class="detail-label">Feels Like</p>
+                                        <p class="detail-value" id="feelsLike">21°C</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="detail-item">
+                                    <i class="fas fa-wind"></i>
+                                    <div>
+                                        <p class="detail-label">Wind Speed</p>
+                                        <p class="detail-value" id="windSpeed">8 mph</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="detail-item">
+                                    <i class="fas fa-tint"></i>
+                                    <div>
+                                        <p class="detail-label">Humidity</p>
+                                        <p class="detail-value" id="humidity">65%</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="forecastTab">
+                    <div class="weather-card">
+                        <div class="weather-header">
+                            <h2 id="forecastCityName">Varanasi</h2>
+                            <p class="weather-subtitle">7-Day weather forecast</p>
+                        </div>
+                        <div class="weather-body">
+                            <div class="forecast-grid" id="forecastGrid">
+                                <!-- Forecast items will be inserted here by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <div class="logo">
+                        <i class="fas fa-cloud"></i>
+                        <span>WeatherCast</span>
+                    </div>
+                    <p>Weather forecasts for every locations.</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Services</h3>
+                    <ul>
+                        <li><a href="#">Daily Forecast</a></li>
+                        <li><a href="#">Weekly Forecast</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Company</h3>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Legal</h3>
+                    <ul>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p><span id="currentYear"></span> WeatherCheck. By Harsh Tiwari.</p>
+            </div>
+        </div>
+    </footer>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <p>Loading weather data...</p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
