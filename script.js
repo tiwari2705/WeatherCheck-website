@@ -26,75 +26,42 @@ if (mobileMenuBtn) {
     mobileMenuBtn.addEventListener('click', () => {
         mainNav.classList.toggle('active');
         const icon = mobileMenuBtn.querySelector('i');
-        if (mainNav.classList.contains('active')) {
-            icon.classList.remove('fa-bars');
-            icon.classList.add('fa-times');
-        } else {
-            icon.classList.remove('fa-times');
-            icon.classList.add('fa-bars');
-        }
+        icon.classList.toggle('fa-bars');
+        icon.classList.toggle('fa-times');
     });
 }
 
 // Tab functionality
-if (tabBtns.length > 0) {
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            tabBtns.forEach(b => b.classList.remove('active'));
-            tabContents.forEach(c => c.classList.remove('active'));
-            btn.classList.add('active');
-            const tabId = btn.getAttribute('data-tab');
-            document.getElementById(`${tabId}Tab`).classList.add('active');
-        });
+tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        tabBtns.forEach(b => b.classList.remove('active'));
+        tabContents.forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(`${btn.getAttribute('data-tab')}Tab`).classList.add('active');
     });
-}
+});
 
 // Search form submission
-if (searchForm) {
-    searchForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const city = searchInput.value.trim();
-        if (city) {
-            loadWeatherData(city);
-        }
-    });
-}
-
-// Sign in form submission
-const signInForm = document.getElementById('signInForm');
-if (signInForm) {
-    signInForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        console.log('Sign in attempt:', { email, password });
-        alert('Sign in functionality would be implemented in a real application.');
-    });
-}
+searchForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const city = searchInput.value.trim();
+    if (city) loadWeatherData(city);
+});
 
 // Get weather icon class based on weather code
 function getWeatherIcon(weatherCode) {
-    if (weatherCode >= 200 && weatherCode < 300) return 'bolt';
-    if (weatherCode >= 300 && weatherCode < 400) return 'cloud-rain';
-    if (weatherCode >= 500 && weatherCode < 600) return 'cloud-showers-heavy';
-    if (weatherCode >= 600 && weatherCode < 700) return 'snowflake';
-    if (weatherCode >= 700 && weatherCode < 800) return 'smog';
-    if (weatherCode === 800) return 'sun';
-    if (weatherCode > 800) return 'cloud';
-    return 'cloud';
+    const icons = {
+        2: 'bolt', 3: 'cloud-rain', 5: 'cloud-showers-heavy',
+        6: 'snowflake', 7: 'smog', 8: 'sun',
+    };
+    return `fa-${icons[Math.floor(weatherCode / 100)] || 'cloud'}`;
 }
 
 // Convert temperature from Kelvin to Celsius
-function kelvinToCelsius(kelvin) {
-    return Math.round(kelvin - 273.15);
-}
+const kelvinToCelsius = kelvin => Math.round(kelvin - 273.15);
 
 // Format date for forecast
-function formatDay(timestamp) {
-    const date = new Date(timestamp * 1000);
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    return days[date.getDay()];
-}
+const formatDay = timestamp => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Date(timestamp * 1000).getDay()];
 
 // Load current weather data
 async function loadCurrentWeather(city) {
@@ -109,30 +76,53 @@ async function loadCurrentWeather(city) {
         document.getElementById('feelsLike').textContent = `${kelvinToCelsius(data.main.feels_like)}°C`;
         document.getElementById('windSpeed').textContent = `${Math.round(data.wind.speed)} mph`;
         document.getElementById('humidity').textContent = `${data.main.humidity}%`;
-        const weatherIcon = document.querySelector('.weather-icon i');
-        weatherIcon.className = '';
-        weatherIcon.classList.add('fas', `fa-${getWeatherIcon(data.weather[0].id)}`);
+        document.querySelector('.weather-icon i').className = `fas ${getWeatherIcon(data.weather[0].id)}`;
         return data.coord;
     } catch (error) {
         console.error('Error fetching current weather:', error);
         showError(error.message);
-        return null;
     }
 }
 
-// Load weather data function
+// Load 7-day forecast data
+async function loadForecastData(lat, lon) {
+    try {
+        const response = await fetch(`${WEATHER_API_URL}/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`);
+        if (!response.ok) throw new Error('Error fetching forecast');
+        const data = await response.json();
+        forecastGrid.innerHTML = '';
+        const dailyData = {};
+        data.list.forEach(item => {
+            const date = item.dt_txt.split(' ')[0];
+            if (!dailyData[date]) dailyData[date] = item;
+        });
+        Object.values(dailyData).slice(0, 7).forEach(day => {
+            const forecastItem = document.createElement('div');
+            forecastItem.classList.add('forecast-item');
+            forecastItem.innerHTML = `
+                <p>${formatDay(day.dt)}</p>
+                <i class="fas ${getWeatherIcon(day.weather[0].id)}"></i>
+                <p>${Math.round(day.main.temp)}°C</p>
+                <p>${day.weather[0].description}</p>
+            `;
+            forecastGrid.appendChild(forecastItem);
+        });
+    } catch (error) {
+        console.error('Error fetching forecast:', error);
+        showError('Could not load forecast data');
+    }
+}
+
+// Load weather data
 async function loadWeatherData(city) {
     errorMessage.textContent = '';
     errorMessage.style.display = 'none';
     loadingOverlay.style.display = 'flex';
     try {
         const coords = await loadCurrentWeather(city);
-        if (coords) {
-            await loadForecastData(coords.lat, coords.lon);
-        }
+        if (coords) await loadForecastData(coords.lat, coords.lon);
     } catch (error) {
         console.error('Error loading weather data:', error);
-        /*showError('Failed to load weather data. Please try again.');*/
     } finally {
         loadingOverlay.style.display = 'none';
     }
@@ -146,19 +136,10 @@ function showError(message) {
 
 // Load weather data on page load
 document.addEventListener('DOMContentLoaded', () => {
-    if (document.querySelector('.weather-container')) {
-        const style = document.createElement('style');
-        style.textContent = `
-            .error-message {
-                background-color: #fee2e2;
-                color: #b91c1c;
-                padding: 0.75rem;
-                border-radius: 0.25rem;
-                margin-bottom: 1rem;
-                display: none;
-            }
-        `;
-        document.head.appendChild(style);
-        loadWeatherData('Varanasi');
-    }
+    document.head.insertAdjacentHTML('beforeend', `
+        <style>
+            .error-message { background-color: #fee2e2; color: #b91c1c; padding: 0.75rem; border-radius: 0.25rem; margin-bottom: 1rem; display: none; }
+        </style>
+    `);
+    loadWeatherData('Varanasi');
 });
